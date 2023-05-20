@@ -8,14 +8,16 @@ import {
   ScrollView,
   Pressable,
   ToastAndroid,
+  ActivityIndicator,
 } from "react-native";
 
 import { useDispatch, useSelector } from "react-redux";
 import { cartSlice } from "../store/cartSlice";
+import { useGetProductQuery } from "../store/apiSlice";
 
-const ProductDetailsScreen = () => {
-  const product = useSelector((state) => state.products.selectedProduct);
-
+const ProductDetailsScreen = ({ route }) => {
+  const id = route.params.id;
+  const { data, error, isLoading } = useGetProductQuery(id);
   const { width } = useWindowDimensions();
   const dispatch = useDispatch();
 
@@ -24,6 +26,20 @@ const ProductDetailsScreen = () => {
     // Alert.alert("Add to cart", "New Product added to cart");
     ToastAndroid.show("Product added to cart", ToastAndroid.SHORT);
   };
+
+  if (isLoading) {
+    return <ActivityIndicator />;
+  }
+
+  if (error) {
+    console.error(error.error);
+    return <Text>Error in fetching products</Text>;
+  }
+
+  const product = data.data;
+  if (!product) {
+    return null;
+  }
 
   return (
     <View>
